@@ -1,0 +1,97 @@
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  </head>
+  <body>
+  <h1>{{ data }}</h1>
+  
+  <!-- contoh looping 
+  <ul>
+  {% for x in listxxx %}
+      <li>x</li>
+  {% endfor %}
+  
+  </ul>
+  -->
+  
+  <div style="color:blue;" id="info_teks"></div>
+  <canvas id="canvas_draw1"></canvas>
+  <br>
+  <br>
+  <canvas id="canvas_draw2"></canvas>
+  
+  <script type="text/javascript">
+  
+    // Declare cnt variable
+    var var_data = 0;
+    var canvas1 = document.getElementById("canvas_draw1");
+      // Declare element variable
+    var canvas2 = document.getElementById("canvas_draw2");
+    var ctx1 = canvas1.getContext("2d");
+    var ctx2 = canvas2.getContext("2d");
+    var img1 = new Image();
+    var img2 = new Image();
+    var info_text = document.getElementById('info_teks');
+  
+    info = {{ data|tojson }};
+  
+    var socket = io.connect('192.168.10.119:3000');
+  
+      socket.on('connect',
+        function() {  
+          console.log('initSocketIO');
+        });
+  
+      // Receive data
+      socket.on('socialDistancing', (data) => {
+  
+        res = JSON.parse(data);
+        
+        // Input data info
+        // info_teks.innerHTML = res.key;
+        
+  
+        img1.src = 'data:image/jpg;base64,' + res.img;
+  
+        var width = img1.naturalWidth;  
+        var height = img1.naturalHeight; 
+        
+        // Set canvas dimension
+        canvas1.width = 620;
+        canvas1.height = 450;
+  
+        // Draw to canvas
+        ctx1.drawImage(img1,0,0,width,height,0,0,650,450);
+  
+  
+    });
+    //<img src="{{ url_for('process_and_sending_data1') }}">
+      socket.on('eye', (data) => {
+  
+        res = JSON.parse(data);
+        
+        // Input data info
+        // info_teks.innerHTML = res.key;
+        
+  
+        img2.src = 'data:image/jpg;base64,' + res.img;
+  
+        var width = img2.naturalWidth;  
+        var height = img2.naturalHeight; 
+        
+        // Set canvas dimension
+        canvas2.width = 620;
+        canvas2.height = 450;
+  
+        // Draw to canvas
+        ctx2.drawImage(img2,0,0,width,height,0,0,650,450);
+  
+  
+    });
+    
+    //<img src="{{ url_for('process_and_sending_data2') }}">
+  
+  </script>
+  
+  
+  </body>
+  

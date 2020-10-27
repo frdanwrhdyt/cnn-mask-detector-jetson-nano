@@ -32,7 +32,7 @@ for imagePath in imagePaths:
 	
 	label = imagePath.split(os.path.sep)[-2]
 
-	image = load_img(imagePath, target_size=(112, 112))
+	image = load_img(imagePath, target_size=(100 , 100))
 	image = img_to_array(image)
 	image = preprocess_input(image)
 	
@@ -59,7 +59,7 @@ aug = ImageDataGenerator(
 	fill_mode="nearest")
 
 baseModel = MobileNetV2(weights="imagenet", include_top=False,
-	input_tensor=Input(shape=(112, 112, 3)))
+	input_tensor=Input(shape=(100, 100, 3)))
 
 headModel = baseModel.output
 headModel = AveragePooling2D(pool_size=(2, 2))(headModel)
@@ -94,17 +94,17 @@ print(classification_report(testY.argmax(axis=1), predIdxs,
 	target_names=lb.classes_))
 
 print("[INFO] saving mask detector model...")
-model.save("mask_detector.model", save_format="h5")
+model.save("mask_detector2.model", save_format="h5")
 
 N = EPOCHS
-# plt.style.use("ggplot")
-# plt.figure()
-# plt.plot(np.arange(0, N), H.history["loss"], label="train_loss")
-# plt.plot(np.arange(0, N), H.history["val_loss"], label="val_loss")
-# plt.plot(np.arange(0, N), H.history["accuracy"], label="train_acc")
-# plt.plot(np.arange(0, N), H.history["val_accuracy"], label="val_acc")
-# plt.title("Training Loss and Accuracy")
-# plt.xlabel("Epoch #")
-# plt.ylabel("Loss/Accuracy")
-# plt.legend(loc="lower left")
-# plt.savefig("plot.png")
+plt.style.use("ggplot")
+plt.figure()
+plt.plot(np.arange(0, N), H.history["loss"], label="train_loss")
+plt.plot(np.arange(0, N), H.history["val_loss"], label="val_loss")
+plt.plot(np.arange(0, N), H.history["accuracy"], label="train_acc")
+plt.plot(np.arange(0, N), H.history["val_accuracy"], label="val_acc")
+plt.title("Training Loss and Accuracy")
+plt.xlabel("Epoch #")
+plt.ylabel("Loss/Accuracy")
+plt.legend(loc="lower left")
+plt.savefig("plot.png")
