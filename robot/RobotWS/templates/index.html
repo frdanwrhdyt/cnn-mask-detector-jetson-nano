@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+      integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+      crossorigin="anonymous"
+    />
+    <title>Control Robot</title>
+    <style>
+      #info_teks {
+        font-size: 14px;
+      }
+
+      .container {
+        margin-top: 20px;
+      }
+
+      button {
+        background-color: #337ab7;
+        border: none;
+        padding: 10px;
+        color: white;
+        border-radius: 5px;
+      }
+
+      button:hover {
+        background-color: #3370b0;
+      }
+
+      .robot-control > div {
+        margin-bottom: 10px;
+      }
+
+      .robot-control button {
+        width: 70px;
+        height: 70px;
+      }
+
+      .robot-control div:nth-child(2) {
+        display: flex;
+
+        justify-content: space-between;
+        align-items: center;
+        margin: auto;
+      }
+
+      .robot-control div:nth-child(3) {
+        margin-top: 20px;
+      }
+
+      .robot-height-control button {
+        display: block;
+        margin: auto;
+        margin-top: 10px;
+      }
+
+      .baris-atas {
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="container">
+        <div class="row baris-atas">
+          <div>
+            <div class="text-center"><h1>Arah Robot</h1></div>
+            <div class="col-sm text-center robot-control">
+              <div class="text-center">
+                <button id="maju">Maju</button>
+              </div>
+              <div class="text-center">
+                <button id="kiri">Kiri</button>
+                <button id="kanan">Kanan</button>
+              </div>
+              <div>
+                <button id="mundur">Mundur</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm text-center">
+            <div>
+              <h1>Tiang</h1>
+              <div class="robot-height-control">
+                <button id="naik">Naik</button>
+                <button id="turun">Turun</button>
+              </div>
+            </div>
+          </div>
+          <div>
+              <h1>Kamera</h1>
+              <!-- <canvas id="canvas_draw"></canvas> -->
+              <canvas id="canvas_draw" alt="image"></canvas>
+            </div>
+        </div>
+      </div>
+
+      <div>
+        <h1>Atur Kecepatan</h1>
+        <button id="kecepatan rendah">Rendah</button>
+        <button id="kecepatan sedang">Sedang</button>
+        <button id="kecepatan tinggi">Tinggi</button>
+      </div>
+
+      <div>
+        <h1>Lain-Lain</h1>
+        <button id="info">Info</button>
+        <button id="emr">Emergency STOP</button>
+        <button id="start">Start</button>
+        <button id="wl"> Warning Light</button>
+        <button id="rt"> Running Text</button>
+      </div>
+
+      <h3 id="info_robot"></h3>
+
+      <div style="color: blue" id="info_teks"></div>
+    </div>
+    
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous">
+    </script>
+
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+      integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+      crossorigin="anonymous"
+    ></script> 
+
+    <script type="text/javascript">
+      // Declare element variable
+      var info_text = document.getElementById("info_robot");
+
+      var sensor = "";
+      var batre = "";
+      var led = "";
+      var emergency = "";
+
+      var btn_atas = document.getElementById("naik");
+      var btn_turun = document.getElementById("turun");
+      var btn_maju = document.getElementById("maju");
+      var btn_mundur = document.getElementById("mundur");
+      var btn_kiri = document.getElementById("kiri");
+      var btn_kanan = document.getElementById("kanan");
+      var btn_info = document.getElementById("info");
+      var btn_kecepatanrendah = document.getElementById("kecepatan rendah");
+      var btn_kecepatansedang = document.getElementById("kecepatan sedang");
+      var btn_kecepatantinggi = document.getElementById("kecepatan tinggi");
+      var btn_emergencystop = document.getElementById("emr");
+      var btn_start = document.getElementById("start");
+      var btn_warninglight = document.getElementById("wl");
+      var btn_runningtext = document.getElementById("rt");
+
+      var socket = io.connect("192.168.10.111:5000");
+
+      socket.on("connect", function () {
+        socket.emit("join_group", { channel: "robot" });
+        console.log("initSocketIO");
+      });
+
+      btn_atas.onmousedown = function () {
+        socket.emit("control", "naik");
+      };
+
+      btn_atas.onmouseup = function () {
+        socket.emit("control", "stop naik");
+      };
+
+      btn_atas.onmouseleave = function () {
+        socket.emit("control", "stop naik");
+      };
+
+      btn_turun.onmousedown = function () {
+        socket.emit("control", "turun");
+      };
+
+      btn_turun.onmouseup = function () {
+        socket.emit("control", "stop turun");
+      };
+
+      btn_turun.onmouseleave = function () {
+        socket.emit("control", "stop turun");
+      };
+
+      btn_maju.onmousedown = function () {
+        socket.emit("control", "maju");
+      };
+
+      btn_maju.onmouseup = function () {
+        socket.emit("control", "stop maju");
+      };
+
+      btn_maju.onmouseleave = function () {
+        socket.emit("control", "stop maju");
+      };
+
+      btn_mundur.onmousedown = function () {
+        socket.emit("control", "mundur");
+      };
+
+      btn_mundur.onmouseup = function () {
+        socket.emit("control", "stop mundur");
+      };
+
+      btn_mundur.onmouseleave = function () {
+        socket.emit("control", "stop mundur");
+      };
+
+      btn_kiri.onmousedown = function () {
+        socket.emit("control", "kiri");
+      };
+
+      btn_kiri.onmouseup = function () {
+        socket.emit("control", "stop kiri");
+      };
+
+      btn_kiri.onmouseleave = function () {
+        socket.emit("control", "stop kiri");
+      };
+
+      btn_kanan.onmousedown = function () {
+        socket.emit("control", "kanan");
+      };
+
+      btn_kanan.onmouseup = function () {
+        socket.emit("control", "stop kanan");
+      };
+
+      btn_kanan.onmouseleave = function () {
+        socket.emit("control", "stop kanan");
+      };
+
+      btn_info.onclick = function () {
+        socket.emit("control", "request data");
+      };
+
+      btn_kecepatansedang.onclick = function () {
+        socket.emit("control", "->1200~");
+      };
+
+      btn_kecepatansedang.onclick = function () {
+        socket.emit("control", "->1500~");
+      };
+
+      btn_kecepatantinggi.onclick = function () {
+        socket.emit("control", "->1800~");
+      };
+
+      btn_emergencystop.onclick = function () {
+        socket.emit("control", "emrbut");
+      };
+
+      btn_start.onclick = function () {
+        socket.emit("control", "strt");
+      };
+
+      btn_warninglight.onclick = function () {
+        socket.emit("control", "WL");
+      };
+
+      btn_runningtext.onclick = function () {
+        socket.emit("control", "RT");
+      };
+
+      socket.on("data_info_robot", (data) => {
+        res = JSON.parse(data);
+
+        sensor = res.sensor;
+        batre = res.batre;
+        //led = res.led;
+        //emergency = res.emergency;
+
+        info_teks.innerHTML =
+          "Sensor: " + sensor + "<br> Kondisi Baterai " + batre;
+      });
+
+      // kamera
+      // Declare cnt variable
+
+      var var_data = 0;
+      var canvas = document.getElementById("canvas_draw");
+      var ctx = canvas.getContext("2d");
+      var img = new Image();
+      var info_text = document.getElementById("info_teks");
+
+      var socket2 = io.connect("http://192.168.10.88:5000");
+
+      socket2.on("connect", function () {
+        console.log("initSocketIO");
+      });
+
+      // Receive data
+      socket2.on("data_EYE", (data) => {
+        res = JSON.parse(data);
+        //console.log(data);
+        //console.log(res);
+
+        img.src = "data:image/jpg;base64," + res.img;
+        var width = img.naturalWidth;
+        var height = img.naturalHeight;
+        // Set canvas dimension
+        canvas.width = 400;
+        canvas.height = 250;
+  
+        // Draw to canvas
+        ctx.drawImage(img,0,0,width,height,0,0,400,250);
+      });
+    </script>
+  </body>
+</html>

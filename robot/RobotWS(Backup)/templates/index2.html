@@ -1,0 +1,141 @@
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+
+</head>
+
+<body>
+
+  <button id="naik">Naik</button>
+  <button id="turun">Turun</button>
+  <button id="maju">Maju</button>
+  <button id="mundur">Mundur</button>
+  <button id="kiri">Kiri</button>
+  <button id="kanan">Kanan</button>
+  <button id="info">Info</button>
+  <button id="kecepatan">Kecepatan 100</button>
+
+  <div>
+    <h1>Kamera</h1>
+    <!-- <canvas id="canvas_draw"></canvas> -->
+    <canvas id="canvas_draw" alt="image"></canvas>
+  </div>
+
+
+  <h3 id="info_robot"></h3>
+
+
+<div style="color:blue;" id="info_teks"></div>
+
+<!-- <canvas id="canvas_draw"></canvas> -->
+
+ <script type="text/javascript">
+
+  // Declare cnt variable
+  var var_data = 0;
+  var canvas = document.getElementById("canvas_draw");
+    // Declare element variable
+    var canvas = document.getElementById("canvas_draw");
+    var ctx = canvas.getContext("2d");
+    var img = new Image();
+    var info_text = document.getElementById('info_robot');
+
+    var sensor = '';
+    var batre = '';
+    var led = '';
+    var emergency = '';
+
+
+    var btn_atas = document.getElementById('naik');
+    var btn_turun = document.getElementById('turun');
+    var btn_maju = document.getElementById('maju');
+    var btn_mundur = document.getElementById('mundur');
+    var btn_kiri = document.getElementById('kiri');
+    var btn_kanan = document.getElementById('kanan');
+    var btn_info = document.getElementById('info');
+    var btn_kecepatan = document.getElementById('kecepatan');
+
+
+    var socket = io.connect('192.168.10.111:5000');
+
+    socket.on('connect',
+      function() {
+        socket.emit('join_group', {channel: 'robot'});
+        console.log('initSocketIO');
+      });
+
+  btn_atas.onmousedown = function(){
+    socket.emit('control', 'naik');
+  };
+
+  btn_atas.onmouseup = function(){
+    socket.emit('control', 'stop naik');
+  };
+
+  btn_turun.onmousedown = function(){
+    socket.emit('control', 'turun');
+  };
+
+  btn_turun.onmouseup = function(){
+    socket.emit('control', 'stop turun');
+  };
+
+  btn_maju.onmousedown = function(){
+    socket.emit('control', 'maju');
+  };
+
+  btn_maju.onmouseup = function(){
+    socket.emit('control', 'stop maju');
+  };
+
+  btn_mundur.onmousedown = function(){
+    socket.emit('control', 'mundur');
+  };
+
+  btn_mundur.onmouseup = function(){
+    socket.emit('control', 'stop mundur');
+  };
+
+  btn_kiri.onmousedown = function(){
+    socket.emit('control', 'kiri');
+  };
+
+  btn_kiri.onmouseup = function(){
+    socket.emit('control', 'stop kiri');
+  };
+
+  btn_kanan.onmousedown = function(){
+    socket.emit('control', 'kanan');
+  };
+
+  btn_kanan.onmouseup = function(){
+    socket.emit('control', 'stop kanan');
+  };
+
+  btn_info.onclick = function(){
+    socket.emit('control','request data');
+  };
+
+  btn_kecepatan.onclick = function(){
+    socket.emit('control','->100~');
+  };
+
+
+	socket.on('data_info_robot', (data) => {
+
+      res = JSON.parse(data);
+
+      sensor = res.sensor;
+      batre = res.batre
+      led = res.led
+      emergency = res.emergency
+
+      info_teks.innerHTML = sensor+' '+batre+' '+led+' '+emergency
+
+  });
+
+
+
+ </script>
+
+
+</body>

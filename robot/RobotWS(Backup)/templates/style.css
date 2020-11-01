@@ -1,0 +1,48 @@
+.container {
+    margin-top: 20px;
+  }
+  
+  button {
+    background-color: #337ab7;
+    border: none;
+    padding: 10px;
+    color: white;
+    border-radius: 5px;
+  }
+  
+  button:hover {
+    background-color: #3370b0;
+  }
+  
+  .robot-control > div {
+    margin-bottom: 10px;
+  }
+  
+  .robot-control button {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .robot-control div:nth-child(2) {
+    display: flex;
+  
+    justify-content: space-between;
+    align-items: center;
+    margin: auto;
+  }
+  
+  .robot-control div:nth-child(3) {
+    margin-top: 20px;
+  }
+  
+  .robot-height-control button {
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+  }
+  
+  .baris-atas {
+    display: flex;
+    justify-content: space-between;
+  }
+  
